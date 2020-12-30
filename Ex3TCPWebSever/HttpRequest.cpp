@@ -1,82 +1,99 @@
 #include "HttpRequest.h"
 
-HttpRequest::HttpRequest(const char *buffer)
-{
-	istringstream iss(buffer);
-	vector<string> parsed_message((istream_iterator<string>(iss)), istream_iterator<string>());
+HttpRequest::HttpRequest(const char *buffer) {
+    istringstream message_stream(buffer);
 
-	this->url = parsed_message[HeaderIndex::URL];
-	this->host = parsed_message[HeaderIndex::HOST];
-	this->user_agent = parsed_message[HeaderIndex::USER_AGENT];
-	parseRequestType(parsed_message[HeaderIndex::REQUEST_TYPE]);
-	parseHttpVersion(parsed_message[HeaderIndex::HTTP_VERSION]);
-	parseConnectionType(parsed_message[HeaderIndex::CONNECTION]);
-	parseLanguage(parsed_message[HeaderIndex::ACCEPT_LANGUAGE]);
+    this->request_status = StatusCode::OK;         //default status is 200 OK.
+    parseMandatoryHeaders(message_stream);
+    parseHeaderLines(message_stream);
 }
 
-void HttpRequest::parseRequestType(const string& request_type) {
+/*!
+ * Initialises url, request_type and http_version based on the first line of the request message.
+ * @param message_stream - The request message as a stream
+ */
+void HttpRequest::parseMandatoryHeaders(std::istringstream& message_stream) {
+    string mandatory_header;
+    getline(message_stream, mandatory_header);
+
+    istringstream iss(mandatory_header);
+    vector<string> parsed_message((istream_iterator<string>(iss)), istream_iterator<string>());
+
+    this->url = parsed_message[HeaderIndex::URL];
+    this->request_type = parseRequestType(parsed_message[HeaderIndex::REQUEST_TYPE]);
+    this->http_version = parseHttpVersion(parsed_message[HeaderIndex::HTTP_VERSION]);
+}
+
+/*!
+ * Initialises all additional header lines provided in the request. Puts all header line into the unordered map
+ * header_lines.
+ * @param message_stream - The request message as a string stream, after the first line has been read.
+ */
+void HttpRequest::parseHeaderLines(std::istringstream& message_stream) {
+    string header_line;
+    int index;
+
+    while (std::getline(message_stream, header_line) && header_line != "\r") {
+        index = header_line.find_first_of(':');
+        //TODO: Need to trim header_line.substr somehow.
+        if(index != std::string::npos) {
+            this->header_lines.insert(std::make_pair(
+                    string(header_line.substr(0, index)),
+                    string(header_line.substr(index + 2, header_line.length()))
+            ));
+        } else {
+            this->request_status = StatusCode::BAD_REQUEST;
+            return;
+        }
+    }
+}
+
+HttpRequest::RequestType HttpRequest::parseRequestType(const string& request_type) {
 	if (request_type == "OPTIONS") {
-		this->request_type = RequestType::OPTIONS;
+		return RequestType::OPTIONS;
 	}
 	else if (request_type == "GET") {
-		this->request_type = RequestType::GET;
+		return RequestType::GET;
 	}
 	else if (request_type == "HEAD") {
-		this->request_type = RequestType::HEAD;
+		return RequestType::HEAD;
 	}
 	else if (request_type == "POST") {
-		this->request_type = RequestType::POST;
+		return RequestType::POST;
 	}
 	else if (request_type == "DELETE") {
-		this->request_type = RequestType::DELETE_;
+		return RequestType::DELETE_;
 	}
 	else if (request_type == "PUT") {
-		this->request_type = RequestType::PUT;
+		return RequestType::PUT;
 	}
 	else if (request_type == "TRACE") {
-		this->request_type = RequestType::TRACE;
+		return RequestType::TRACE;
 	}
 	else if (request_type == "CONNECT") {
-		this->request_type = RequestType::CONNECT;
+		return RequestType::CONNECT;
 	}
 	else {
-		this->request_type = RequestType::UNDEFINED;
+        this->request_status = StatusCode::BAD_REQUEST;
+        return RequestType::UNDEFINED;
 	}
 }
 
-void HttpRequest::parseHttpVersion(const string& http_version) {
+/*!
+ * Parses the HTTP version of the request based on the string retrieved from the message.
+ * @param http_version - The HTTP version retreived from the mesage
+ * @return the HTTP version of the request as HttpRequest::HttpVersion enum.
+ */
+HttpRequest::HttpVersion HttpRequest::parseHttpVersion(const string& http_version) {
 	if (http_version == "HTTP/1.1") {
-		this->http_version = HttpVersion::HTTP_1_1;
+		return HttpVersion::HTTP_1_1;
 	}
 	else if (http_version == "HTTP/1.0") {
-		this->http_version = HttpVersion::HTTP_1_0;
+		return HttpVersion::HTTP_1_0;
 	}
 	else {
-		this->http_version = HttpVersion::UNDEFINED;
-	}
-}
-
-void HttpRequest::parseConnectionType(const string& connection_type) {
-	if (connection_type == "close") {
-		this->connection_type = ConnectionType::CLOSE;
-	}
-	else if (connection_type == "keep-alive") {
-		this->connection_type = ConnectionType::KEEP_ALIVE;
-	}
-	else {
-		this->connection_type = ConnectionType::UNDEFINED;
-	}
-}
-
-void HttpRequest::parseLanguage(const string& accept_language) {
-	if (accept_language == "en") {
-		this->accept_language = AcceptLanguage::EN;
-	}
-	else if (accept_language == "he") {
-		this->accept_language = AcceptLanguage::HE;
-	}
-	else {
-		this->accept_language = AcceptLanguage::UNDEFINED;
+        this->request_status = StatusCode::BAD_REQUEST;
+        return HttpVersion::UNDEFINED;
 	}
 }
 
@@ -91,21 +108,4 @@ const string &HttpRequest::getUrl() const {
 HttpRequest::HttpVersion HttpRequest::getHttpVersion() const {
 	return http_version;
 }
-
-const string &HttpRequest::getHost() const {
-	return host;
-}
-
-const string &HttpRequest::getUserAgent() const {
-	return user_agent;
-}
-
-HttpRequest::ConnectionType HttpRequest::getConnectionType() const {
-	return connection_type;
-}
-
-HttpRequest::AcceptLanguage HttpRequest::getAcceptLanguage() const {
-	return accept_language;
-}
-
 
