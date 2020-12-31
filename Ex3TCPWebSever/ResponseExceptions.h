@@ -6,8 +6,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 
-#define NOT_FOUND_PAGE   ".\\resources\\404-not-found.html"
-#define BAD_REQUEST_PAGE ".\\resources\\300-bad-request.html"
+#define NOT_FOUND_PAGE   ".\\resources\\error-pages\\404-not-found.html"
+#define BAD_REQUEST_PAGE ".\\resources\\error-pages\\300-bad-request.html"
 
 using namespace std;
 

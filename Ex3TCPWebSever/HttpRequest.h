@@ -48,6 +48,8 @@ private:
 	string          url;
 	HttpVersion     http_version;
 
+	string          lang;
+    string          message_body;
     unordered_map<string, string> header_lines;
 
 public:
@@ -58,11 +60,16 @@ public:
     const string& getUrl()          const;
     string getRequestTypeAsString() const;
     string getHttpVersionAsString() const;
+    string getMessageBody()         const;
     const unordered_map<string, string>& getHeaderLines() const;
+
+    const string &getLanguage() const;
 
 private:
     void parseHeaderLines(std::istringstream& message_stream);
     void parseMandatoryHeaders(std::istringstream& message_stream);
+    void parseMessageBody(std::istringstream& message_stream);
+    void parseUrl();
     RequestType parseRequestType(const string& request_type);
 	HttpVersion parseHttpVersion(const string& http_version);
 };

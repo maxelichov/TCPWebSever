@@ -76,10 +76,9 @@ void SocketState::receiveMessage() throw(SocketException) {
 
 void SocketState::sendMessage() {
     int bytesSent = 0;
-    char sendBuffer[SEND_BUFFER_SIZE];
 
     HttpResponse response(*http_request);
-    bytesSent = send(socket_id, response.getContent(), (int) strlen(sendBuffer), 0);
+    bytesSent = send(socket_id, response.getContent(), (int) strlen(response.getContent().length()), 0);
 
     if (SOCKET_ERROR == bytesSent) {
         cout << "HTTP Server: Error at send(): " << WSAGetLastError() << endl;

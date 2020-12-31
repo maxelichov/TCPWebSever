@@ -1,9 +1,12 @@
 #include "HttpRequest.h"
 
 HttpRequest::HttpRequest(const char *buffer) {
+    this->lang = "en";
     istringstream message_stream(buffer);
     parseMandatoryHeaders(message_stream);
     parseHeaderLines(message_stream);
+    parseMessageBody(message_stream);
+    parseUrl();
 }
 
 /*!
@@ -32,7 +35,7 @@ void HttpRequest::parseHeaderLines(std::istringstream& message_stream) {
     string header_line;
     int index;
 
-    while (std::getline(message_stream, header_line) && header_line != "\r") {
+    while (std::getline(message_stream, header_line) && header_line != "\r\n") {
         index = header_line.find_first_of(':');
         //TODO: Need to trim header_line.substr somehow.
         if (index != std::string::npos) {
@@ -42,6 +45,10 @@ void HttpRequest::parseHeaderLines(std::istringstream& message_stream) {
             ));
         }
     }
+}
+
+void HttpRequest::parseMessageBody(std::istringstream& message_stream) {
+    this->message_body = message_stream.str();
 }
 
 HttpRequest::RequestType HttpRequest::parseRequestType(const string& request_type) {
@@ -91,6 +98,21 @@ HttpRequest::HttpVersion HttpRequest::parseHttpVersion(const string& http_versio
 	}
 }
 
+void HttpRequest::parseUrl() {
+    string url_delimiter = "?";
+    string query_delimiter = "=";
+
+    //If there are query parameters
+    if (url.find(url_delimiter) != string::npos && url.find(query_delimiter) != string::npos) {
+        string temp_url = url.substr(0, url.find(url_delimiter));
+        url.erase(0, url.find(url_delimiter) + url_delimiter.length());
+        url.erase(0, url.find(query_delimiter) + query_delimiter.length());
+
+        lang = url;
+        url = temp_url;
+    }
+}
+
 HttpRequest::RequestType HttpRequest::getRequestType() const {
 	return request_type;
 }
@@ -101,6 +123,10 @@ const string &HttpRequest::getUrl() const {
 
 HttpRequest::HttpVersion HttpRequest::getHttpVersion() const {
 	return http_version;
+}
+
+const string &HttpRequest::getLanguage() const {
+    return lang;
 }
 
 string HttpRequest::getRequestTypeAsString() const {
@@ -139,5 +165,9 @@ string HttpRequest::getHttpVersionAsString() const {
 
 const unordered_map<string, string> &HttpRequest::getHeaderLines() const {
     return header_lines;
+}
+
+string HttpRequest::getMessageBody() const {
+    return message_body;
 }
 

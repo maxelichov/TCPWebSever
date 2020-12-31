@@ -9,6 +9,7 @@ HttpResponse::HttpResponse(const HttpRequest &request) {
 
     this->url = request.getUrl();
     this->http_version = request.getHttpVersionAsString();
+    this->language = request.getLanguage();
 
     try {
         switch (request.getRequestType()) {
@@ -16,9 +17,10 @@ HttpResponse::HttpResponse(const HttpRequest &request) {
                 options();
                 break;
             case (HttpRequest::RequestType::GET):
-                get(request.getHeaderLines());
+                get();
                 break;
             case (HttpRequest::RequestType::POST):
+                //request.getMessageBody() goes here.
                 post();
                 break;
             case (HttpRequest::RequestType::HEAD):
@@ -74,7 +76,7 @@ void HttpResponse::get() throw (ResponseException) {
     string response_data;
     ostringstream oss;
 
-    ifstream file(ROOT_DIR + url);
+    ifstream file(ROOT_DIR + language + "\\" + url);
     if (file.good()) {
         status_code = OK_200;
         response_data = string((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
@@ -100,7 +102,7 @@ void HttpResponse::head() throw (ResponseException) {
     string response_data;
     ostringstream oss;
 
-    ifstream file(ROOT_DIR + url);
+    ifstream file(ROOT_DIR + language + "\\" + url);
     if (file.good()) {
         status_code = OK_200;
         response_data = string((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
@@ -122,10 +124,9 @@ void HttpResponse::head() throw (ResponseException) {
 
 void HttpResponse::delete_() throw (ResponseException){
     ostringstream oss;
-    char *remove_dir;
-
-    remove_dir = strcat(ROOT_DIR, url.c_str());
-    if (remove(remove_dir) != 0) {
+    string remove_dir = ROOT_DIR + language + "\\" + url;
+    
+    if (remove(remove_dir.c_str()) != 0) {
         status_code = NOT_FOUND_404;
         throw NotFoundException();
     } else {

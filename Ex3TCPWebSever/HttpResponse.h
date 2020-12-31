@@ -28,6 +28,7 @@ private:
     string status_code;
     string url;
     string http_version;
+    string language;
     string content;
 
 public:
