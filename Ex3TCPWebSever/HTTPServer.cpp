@@ -134,7 +134,7 @@ bool HTTPServer::addSocket(SOCKET id, SocketState::RecvState recv_state) {
 }
 
 bool HTTPServer::removeSocket(int index) {
-	sockets[index].remove();
+    sockets[index].removeSocket();
 	sockets_count--;
 	return true;
 }

@@ -2,8 +2,6 @@
 
 HttpRequest::HttpRequest(const char *buffer) {
     istringstream message_stream(buffer);
-
-    this->request_status = StatusCode::OK;         //default status is 200 OK.
     parseMandatoryHeaders(message_stream);
     parseHeaderLines(message_stream);
 }
@@ -22,6 +20,7 @@ void HttpRequest::parseMandatoryHeaders(std::istringstream& message_stream) {
     this->url = parsed_message[HeaderIndex::URL];
     this->request_type = parseRequestType(parsed_message[HeaderIndex::REQUEST_TYPE]);
     this->http_version = parseHttpVersion(parsed_message[HeaderIndex::HTTP_VERSION]);
+
 }
 
 /*!
@@ -36,14 +35,11 @@ void HttpRequest::parseHeaderLines(std::istringstream& message_stream) {
     while (std::getline(message_stream, header_line) && header_line != "\r") {
         index = header_line.find_first_of(':');
         //TODO: Need to trim header_line.substr somehow.
-        if(index != std::string::npos) {
+        if (index != std::string::npos) {
             this->header_lines.insert(std::make_pair(
                     string(header_line.substr(0, index)),
                     string(header_line.substr(index + 2, header_line.length()))
             ));
-        } else {
-            this->request_status = StatusCode::BAD_REQUEST;
-            return;
         }
     }
 }
@@ -74,7 +70,6 @@ HttpRequest::RequestType HttpRequest::parseRequestType(const string& request_typ
 		return RequestType::CONNECT;
 	}
 	else {
-        this->request_status = StatusCode::BAD_REQUEST;
         return RequestType::UNDEFINED;
 	}
 }
@@ -92,7 +87,6 @@ HttpRequest::HttpVersion HttpRequest::parseHttpVersion(const string& http_versio
 		return HttpVersion::HTTP_1_0;
 	}
 	else {
-        this->request_status = StatusCode::BAD_REQUEST;
         return HttpVersion::UNDEFINED;
 	}
 }
@@ -107,5 +101,43 @@ const string &HttpRequest::getUrl() const {
 
 HttpRequest::HttpVersion HttpRequest::getHttpVersion() const {
 	return http_version;
+}
+
+string HttpRequest::getRequestTypeAsString() const {
+    switch (request_type) {
+        case RequestType::TRACE:
+            return "TRACE";
+        case RequestType::OPTIONS:
+            return "OPTIONS";
+        case RequestType::GET:
+            return "GET";
+        case RequestType::HEAD:
+            return "HEAD";
+        case RequestType::POST:
+            return "POST";
+        case RequestType::DELETE_:
+            return "DELETE";
+        case RequestType::PUT:
+            return "PUT";
+        case RequestType::CONNECT:
+            return "CONNECT";
+        case RequestType::UNDEFINED:
+            return "UNDEFINED";
+    }
+}
+
+string HttpRequest::getHttpVersionAsString() const {
+    switch (http_version) {
+        case HttpVersion::HTTP_1_0:
+            return "HTTP/1.0";
+        case HttpVersion::HTTP_1_1:
+            return "HTTP/1.1";
+        case HttpVersion::UNDEFINED:
+            return "UNDEFINED";
+    }
+}
+
+const unordered_map<string, string> &HttpRequest::getHeaderLines() const {
+    return header_lines;
 }
 

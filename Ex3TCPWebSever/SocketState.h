@@ -3,6 +3,7 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 #include <iostream>
+#include <stdio.h>
 #include <winsock2.h>
 #include <string.h>
 #include <time.h>
@@ -11,7 +12,9 @@
 #include <vector>
 
 #include "HttpRequest.h"
+#include "HttpResponse.h"
 #include "HTTPServerException.h"
+#include "ResponseExceptions.h"
 
 using namespace std;
 
@@ -23,11 +26,12 @@ public:
 	enum class SendState { EMPTY, IDLE, SEND };
 
 private:
-	SOCKET      socket_id;
+    const static int SEND_BUFFER_SIZE = 4096;
+
+    SOCKET      socket_id;
 	RecvState   recv_state;
 	SendState   send_state;
-	HttpRequest *http_request;      ///Does request come in one packet? can it be divided into many?
-
+	HttpRequest *http_request;
 
 public:
 	SocketState();
@@ -39,19 +43,21 @@ public:
 	const HttpRequest *getHttpRequest() const;
 	void setReceiveState(SocketState::RecvState newState);
 	void setSendState(SocketState::SendState newState);
-	void remove();
+	void removeSocket();
 	void receiveMessage()               throw (SocketException);
 
 private:
-	void handleRequest(char* sendBuffer);
-	void options( char* sendBuffer);
-	void get(char* sendBuffer);
-	void head( char* sendBuffer);
-	void delete_( char* sendBuffer);
-	void trace( char* sendBuffer);
-	void connect( char* sendBuffer);
-	void post( char* sendBuffer);
-	void put( char* sendBuffer);
+/*	void handleRequest(char* sendBuffer);
+	void options( char* sendBuffer)         throw (ResponseException);
+	void get(char* sendBuffer)              throw (ResponseException);
+	void head( char* sendBuffer)            throw (ResponseException);
+	void delete_( char* sendBuffer)         throw (ResponseException);
+	void trace( char* sendBuffer)           throw (ResponseException);
+	void post( char* sendBuffer)            throw (ResponseException);
+	void put( char* sendBuffer)             throw (ResponseException);
+
+	void handleResponseException(const string& page_dir, const string& status);*/
+
 	
 
 	

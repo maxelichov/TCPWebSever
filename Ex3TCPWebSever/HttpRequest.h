@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_map>
 
+
 using namespace std;
 
 class HttpRequest 
@@ -18,11 +19,9 @@ private:
 	    HTTP_VERSION,
 	};
 
-	enum StatusCode {
-	    OK                      = 200,
-	    BAD_REQUEST             = 400,
-	    NOT_FOUND               = 404,
-	    INTERNAL_SERVER_ERROR   = 500
+	enum class AcceptLanguage {
+	    EN,
+	    HE
 	};
 
 public:
@@ -37,6 +36,7 @@ public:
 	    TRACE,
 	    CONNECT
 	};
+
 	enum class HttpVersion {
 	    UNDEFINED,
 	    HTTP_1_0,
@@ -47,16 +47,18 @@ private:
     RequestType     request_type;
 	string          url;
 	HttpVersion     http_version;
-	StatusCode      request_status;
 
-	unordered_map<string, string> header_lines;
+    unordered_map<string, string> header_lines;
 
 public:
 	explicit HttpRequest(const char *buffer);
 
-	RequestType     getRequestType()    const;
-	const string&   getUrl()            const;
-	HttpVersion     getHttpVersion()    const;
+	RequestType getRequestType()    const;
+	HttpVersion getHttpVersion()    const;
+    const string& getUrl()          const;
+    string getRequestTypeAsString() const;
+    string getHttpVersionAsString() const;
+    const unordered_map<string, string>& getHeaderLines() const;
 
 private:
     void parseHeaderLines(std::istringstream& message_stream);
