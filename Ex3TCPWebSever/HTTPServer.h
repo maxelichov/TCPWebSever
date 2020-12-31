@@ -45,4 +45,5 @@ private:
 	bool removeSocket(int index);
 	void acceptConnection(int index);
 	void sendMessage(int index);
+	void changeToSendState(int index);
 };

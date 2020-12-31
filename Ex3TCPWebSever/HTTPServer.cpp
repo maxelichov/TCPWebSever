@@ -54,7 +54,8 @@ void HTTPServer::run() {
 
 		fd_set waitSend;
 		FD_ZERO(&waitSend);
-		for (int i = 0; i < max_sockets; i++) {
+		for (int i = 0; i < max_sockets; i++)
+		{
 			if (sockets[i].getSendState() == SocketState::SendState::SEND)
 				FD_SET(sockets[i].getSocketID(), &waitSend);
 		}
@@ -78,8 +79,11 @@ void HTTPServer::run() {
 					break;
 
 				case SocketState::RecvState::RECEIVE:
-					try {
+					try 
+					{
 						receiveMessage(i);
+						sockets[i].setReceiveState(SocketState::RecvState::EMPTY);
+						sockets[i].setSendState(SocketState::SendState::SEND);
 					}
 					catch (SocketException& e) {
 						cout << e.what();
@@ -92,16 +96,25 @@ void HTTPServer::run() {
 		}
 
 		for (int i = 0; i < max_sockets && nfd > 0; i++) {
-			if (FD_ISSET(sockets[i].getSocketID(), &waitSend)) {
+			if (FD_ISSET(sockets[i].getSocketID(), &waitSend)) 
+			{
 				nfd--;
 				switch (sockets[i].getSendState()) {
 				case SocketState::SendState::SEND:
 					sendMessage(i);
+					sockets[i].setSendState(SocketState::SendState::IDLE);
 					break;
 				}
 			}
 		}
 	}
+}
+
+
+void HTTPServer::changeToSendState(int i)
+{
+	sockets[i].setReceiveState(SocketState::RecvState::EMPTY);
+	sockets[i].setSendState(SocketState::SendState::SEND);
 }
 
 void HTTPServer ::sendMessage(int i)

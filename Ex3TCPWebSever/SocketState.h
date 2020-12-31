@@ -37,20 +37,23 @@ public:
 	RecvState getRecvState()	        const;
 	SendState getSendState()	        const;
 	const HttpRequest *getHttpRequest() const;
-
+	void setReceiveState(SocketState::RecvState newState);
+	void setSendState(SocketState::SendState newState);
 	void remove();
 	void receiveMessage()               throw (SocketException);
 
 private:
-	void handleRequest(const char* sendBuffer);
-	void options(const char* sendBuffer);
-	void get(const char* sendBuffer);
-	void head(const char* sendBuffer);
-	void delete_(const char* sendBuffer);
-	void trace(const char* sendBuffer);
-	void connect(const char* sendBuffer);
-	void post(const char* sendBuffer);
-	void put(const char* sendBuffer);
+	void handleRequest(char* sendBuffer);
+	void options( char* sendBuffer);
+	void get(char* sendBuffer);
+	void head( char* sendBuffer);
+	void delete_( char* sendBuffer);
+	void trace( char* sendBuffer);
+	void connect( char* sendBuffer);
+	void post( char* sendBuffer);
+	void put( char* sendBuffer);
+	
+
 	
 
 };
