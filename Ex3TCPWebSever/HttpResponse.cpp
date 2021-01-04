@@ -1,7 +1,9 @@
 //
 // Created by Nadav Suliman on 31/12/20.
 //
-
+#pragma once
+#define _CRT_SECURE_NO_WARNINGS
+#include <time.h>
 #include "HttpResponse.h"
 
 HttpResponse::HttpResponse(const HttpRequest &request) {
@@ -33,7 +35,7 @@ HttpResponse::HttpResponse(const HttpRequest &request) {
                 put();
                 break;
             case (HttpRequest::RequestType::TRACE):
-                trace();
+                trace(request.toString());
                 break;
             default:
                 throw BadRequestException();
@@ -48,12 +50,13 @@ void HttpResponse::options() throw (ResponseException) {
     ostringstream oss;
     string response_data;
 
-    if (url == "*") {
+    if (url == "/*") {
         response_data = "Allow: OPTIONS, GET, HEAD, POST, PUT, TRACE, DELETE";
     } else {
-        ifstream file(ROOT_DIR + url);
+        ifstream file(ROOT_DIR + language + "\\" + url);
+		cout << ROOT_DIR + url << endl; // DEBUG
         if (file.good()) {
-            response_data = "Allow: OPTIONS, GET, HEAD, DELETE, TRACE";
+            response_data = "Allowed: OPTIONS, GET, HEAD, DELETE, TRACE";
         } else {
             status_code = NOT_FOUND_404;
             throw NotFoundException();
@@ -62,7 +65,7 @@ void HttpResponse::options() throw (ResponseException) {
     }
 
     oss << http_version << " " << status_code << "\r\n"
-        << "Date: " << ctime(&response_time) << "\r\n"
+        << "Date: " << ctime(&response_time) 
         << "Server: Nadav and Max's server" << "\r\n"
         << "Content-Length: " << "0" << "\r\n"
         << "Content-Type: " << "text/html" << "\r\n"
@@ -77,6 +80,7 @@ void HttpResponse::get() throw (ResponseException) {
     ostringstream oss;
 
     ifstream file(ROOT_DIR + language + "\\" + url);
+	cout << ROOT_DIR + language + "\\" + url << endl; // DEBUG
     if (file.good()) {
         status_code = OK_200;
         response_data = string((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
@@ -87,7 +91,7 @@ void HttpResponse::get() throw (ResponseException) {
     file.close();
 
     oss << http_version << " " << status_code << "\r\n"
-        << "Date: " << ctime(&response_time) << "\r\n"
+        << "Date: " << ctime(&response_time) 
         << "Server: Nadav and Max's server" << "\r\n"
         << "Content-Length: " << response_data.length() << "\r\n"
         << "Content-Type: " << "text/html"
@@ -113,7 +117,7 @@ void HttpResponse::head() throw (ResponseException) {
     file.close();
 
     oss << http_version << " " << status_code << "\r\n"
-        << "Date: " << ctime(&response_time) << "\r\n"
+        << "Date: " << ctime(&response_time) 
         << "Server: Nadav and Max's server" << "\r\n"
         << "Content-Length: " << response_data.length() << "\r\n"
         << "Content-Type: " << "text/html"
@@ -133,25 +137,55 @@ void HttpResponse::delete_() throw (ResponseException){
         status_code = NO_CONTENT_204;
     }
 
-    oss << http_version << " " << status_code << "\r\n"
-        << "Date: " << ctime(&response_time) << "\r\n"
-        << "Server: Nadav and Max's server" << "\r\n"
-        << "Content-Length: " << 0 << "\r\n"
-        << "Content-Type: " << "http/message"
+	oss << http_version << " " << status_code << "\r\n"
+		<< "Date: " << ctime(&response_time)
+		<< "Server: Nadav and Max's server" << "\r\n"
+		<< "Content-Length: " << 0 << "\r\n"
+		<< "Content-Type: " << "http/message" << "\r\n"
+		<< "File-Deleted: " << url 
         << "\r\n"
         << "\r\n";
 
     content = oss.str();
 }
 
-void HttpResponse::trace() throw (ResponseException) {
+void HttpResponse::trace(const string& originalRequest) throw (ResponseException)
+{
+	string response_data = originalRequest;
+	ostringstream oss;
 
+	ifstream file(ROOT_DIR + language + "\\" + url);
+	cout << ROOT_DIR + language + "\\" + url; // DEBUG
+	if (file.good()) {
+		status_code = OK_200;
+	}
+	else {
+		status_code = NOT_FOUND_404;
+		throw NotFoundException();
+	}
+	
+	file.close();
+	
+
+	oss << http_version << " " << status_code << "\r\n"
+		<< "Date: " << ctime(&response_time)
+		<< "Server: Nadav and Max's server" << "\r\n"
+		<< "Content-Length: " << response_data.length() << "\r\n"
+		<< "Content-Type: " << "http/message" << "\r\n"
+		<< "\r\n"
+		<< "\r\n"
+		<< response_data << "\r\n";
+
+	content = oss.str();
 }
 
-void HttpResponse::post() throw (ResponseException) {
+void HttpResponse::post() throw (ResponseException) 
+{
+	
 }
 
-void HttpResponse::put() throw (ResponseException) {
+void HttpResponse::put() throw (ResponseException)
+{
 
 }
 
@@ -166,7 +200,7 @@ void HttpResponse::handleResponseException(const string& page_dir) {
     file.close();
 
     oss << http_version << " " << status_code << "\r\n"
-        << "Date: " << ctime(&response_time) << "\r\n"
+        << "Date: " << ctime(&response_time) 
         << "Server: Nadav and Max's server" << "\r\n"
         << "Content-Length: " << response_data.length() << "\r\n"
         << "Content-Type: " << "text/html"

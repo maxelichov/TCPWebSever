@@ -47,7 +47,7 @@ private:
     RequestType     request_type;
 	string          url;
 	HttpVersion     http_version;
-
+	string			originalMessage;
 	string          lang;
     string          message_body;
     unordered_map<string, string> header_lines;
@@ -62,7 +62,7 @@ public:
     string getHttpVersionAsString() const;
     string getMessageBody()         const;
     const unordered_map<string, string>& getHeaderLines() const;
-
+	const string& toString() const;
     const string &getLanguage() const;
 
 private:

@@ -17,7 +17,7 @@ private:
     int status_code;
     string page_dir;
 public:
-    ResponseException(int statusCode, const string& page_dir) : status_code(statusCode) {}
+    ResponseException(int statusCode, const string& page_dir) : status_code(statusCode),page_dir(page_dir) {}
     int getStatusCode() { return status_code; }
     const string& getPageDir() { return page_dir; }
     const char *what() const noexcept override = 0;
@@ -31,6 +31,6 @@ public:
 
 class NotFoundException : public ResponseException {
 public:
-    NotFoundException() : ResponseException(404, NOT_FOUND_PAGE) {}
+    NotFoundException() : ResponseException(404, string(NOT_FOUND_PAGE)) {}
     const char *what() const noexcept override { return "404 NOT FOUND"; }
 };

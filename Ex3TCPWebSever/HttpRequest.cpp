@@ -2,6 +2,7 @@
 
 HttpRequest::HttpRequest(const char *buffer) {
     this->lang = "en";
+	originalMessage = string(buffer);
     istringstream message_stream(buffer);
     parseMandatoryHeaders(message_stream);
     parseHeaderLines(message_stream);
@@ -24,6 +25,11 @@ void HttpRequest::parseMandatoryHeaders(std::istringstream& message_stream) {
     this->request_type = parseRequestType(parsed_message[HeaderIndex::REQUEST_TYPE]);
     this->http_version = parseHttpVersion(parsed_message[HeaderIndex::HTTP_VERSION]);
 
+}
+
+const string& HttpRequest::toString() const
+{
+	return originalMessage;
 }
 
 /*!
@@ -99,9 +105,11 @@ HttpRequest::HttpVersion HttpRequest::parseHttpVersion(const string& http_versio
 }
 
 void HttpRequest::parseUrl() {
+	string resource_delimiter = "/";
     string url_delimiter = "?";
     string query_delimiter = "=";
 
+	url = url.erase(0, url.find(resource_delimiter) + resource_delimiter.length());
     //If there are query parameters
     if (url.find(url_delimiter) != string::npos && url.find(query_delimiter) != string::npos) {
         string temp_url = url.substr(0, url.find(url_delimiter));

@@ -78,14 +78,14 @@ void SocketState::sendMessage() {
     int bytesSent = 0;
 
     HttpResponse response(*http_request);
-    bytesSent = send(socket_id, response.getContent(), (int) strlen(response.getContent().length()), 0);
+    bytesSent = send(socket_id, response.getContent().c_str(), response.getContent().length(), 0);
 
     if (SOCKET_ERROR == bytesSent) {
         cout << "HTTP Server: Error at send(): " << WSAGetLastError() << endl;
         return;
     }
 
-    cout << "HTTP Server: Sent: " << bytesSent << "\\" << strlen(sendBuffer) << " bytes of \"" << sendBuffer
+    cout << "HTTP Server: Sent: " << bytesSent << "\\" << response.getContent().length() << " bytes of \"" << response.getContent().c_str()
          << "\" message.\n";
 }
 

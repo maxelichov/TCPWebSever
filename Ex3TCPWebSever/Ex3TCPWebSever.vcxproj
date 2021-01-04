@@ -124,15 +124,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="HttpRequest.cpp" />
+    <ClCompile Include="HttpResponse.cpp" />
     <ClCompile Include="HTTPServer.cpp" />
-    <ClCompile Include="HTTPServerException.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SocketState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HttpRequest.h" />
+    <ClInclude Include="HttpResponse.h" />
     <ClInclude Include="HTTPServer.h" />
     <ClInclude Include="HTTPServerException.h" />
+    <ClInclude Include="ResponseExceptions.h" />
     <ClInclude Include="SocketState.h" />
   </ItemGroup>
   <ItemGroup>

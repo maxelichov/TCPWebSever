@@ -1,4 +1,3 @@
-#pragma once
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <string.h>
@@ -41,7 +40,7 @@ private:
     void get()             throw (ResponseException);
     void head()            throw (ResponseException);
     void delete_()         throw (ResponseException);
-    void trace()           throw (ResponseException);
+    void trace(const string& originalRequest)           throw (ResponseException);
     void post()            throw (ResponseException);
     void put()             throw (ResponseException);
     void handleResponseException(const string& page_dir);
